@@ -14,6 +14,8 @@ import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity {
 
+    private TextView info;
+    private Button button;
     private EditText gameName;
     private String name;
 
@@ -21,10 +23,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        final TextView info = findViewById(R.id.textView);
-        final Button button = findViewById(R.id.button);
+        info = (TextView)findViewById(R.id.textView);
+        button = (Button)findViewById(R.id.button);
         gameName = (EditText)findViewById(R.id.editText);
-
 
         button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -34,17 +35,19 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         try {
-
                             Document doc = Jsoup.connect("https://store.steampowered.com/search/?term=" + name).get();
-                            Elements el = doc.select("#search_resultsRows");
-                            Element e = el.select("a").first();
-                            String e0 = el.select("span.title").first().text();
-                            String e1 = e.select("div[class=col search_price  responsive_secondrow]").text();
-                            String e2 = e.select("div[class=col search_price discounted responsive_secondrow]").text();
-                            System.out.println(e0);
-                            System.out.println(e1);
-                            System.out.println(e2);
-                            info.setText(e0 + e1 + e2);
+                            String result = doc.select("div[class=search_results_count]").text();
+
+                            if (result.equals("0 results match your search.")){
+                                info.setText("can't find game with this title");
+                            } else {
+                                Elements el = doc.select("#search_resultsRows");
+                                Element firstElement = el.select("a").first();
+                                String title = firstElement.select("span.title").text();
+                                String price = firstElement.select("div[class=col search_price  responsive_secondrow]").text();
+                                String discountedPrice = firstElement.select("div[class=col search_price discounted responsive_secondrow]").text();
+                                info.setText(title + " " + price + " " + discountedPrice);
+                            }
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
