@@ -35,19 +35,36 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         try {
-                            Document doc = Jsoup.connect("https://store.steampowered.com/search/?term=" + name).get();
+                            Document doc = Jsoup.connect("https://store.steampowered.com/search/?term=" + name + "&category1=998").get();
                             String result = doc.select("div[class=search_results_count]").text();
 
-                            if (result.equals("0 results match your search.")){
+
+                            Elements el = doc.select("#search_results");
+                            Elements elements = el.select("a");
+                            boolean found = false;
+                            for (Element element : elements){
+                                String title = element.select("span.title").text();
+                                if (name.toUpperCase().equals(title.toUpperCase())){
+                                    String price = element.select("div[class=col search_price  responsive_secondrow]").text();
+                                    String discountedPrice = element.select("div[class=col search_price discounted responsive_secondrow]").text();
+                                    info.setText(title + " " + price + " " + discountedPrice);
+                                    found = true;
+                                }
+                            }
+                            if (found == false){
+                                info.setText("can't find game with this title");
+                            }
+
+                            /*if (result.equals("0 results match your search.")){
                                 info.setText("can't find game with this title");
                             } else {
-                                Elements el = doc.select("#search_resultsRows");
+                                Elements el = doc.select("#search_results");
                                 Element firstElement = el.select("a").first();
                                 String title = firstElement.select("span.title").text();
                                 String price = firstElement.select("div[class=col search_price  responsive_secondrow]").text();
                                 String discountedPrice = firstElement.select("div[class=col search_price discounted responsive_secondrow]").text();
                                 info.setText(title + " " + price + " " + discountedPrice);
-                            }
+                            }*/
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
