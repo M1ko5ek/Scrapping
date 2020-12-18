@@ -19,6 +19,8 @@ public class MainActivity extends AppCompatActivity {
     private EditText gameName;
     private TextView wrongName;
     private String name;
+    private TextView text0,text1,text2,text3,text4,text5,text6,text7,text8,text9,text10,text11,text12,text13,text14,text15,text16,text17,text18,text19,text20;
+    private TextView[] textViews;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,7 +30,28 @@ public class MainActivity extends AppCompatActivity {
         button = (Button)findViewById(R.id.button);
         gameName = (EditText)findViewById(R.id.editText);
         wrongName = (TextView)findViewById(R.id.wrongName);
-
+        text0 = (TextView)findViewById(R.id.text0);
+        text1 = (TextView)findViewById(R.id.text1);
+        text2 = (TextView)findViewById(R.id.text2);
+        text3 = (TextView)findViewById(R.id.text3);
+        text4 = (TextView)findViewById(R.id.text4);
+        text5 = (TextView)findViewById(R.id.text5);
+        text6 = (TextView)findViewById(R.id.text6);
+        text7 = (TextView)findViewById(R.id.text7);
+        text8 = (TextView)findViewById(R.id.text8);
+        text9 = (TextView)findViewById(R.id.text9);
+        text10 = (TextView)findViewById(R.id.text10);
+        text11 = (TextView)findViewById(R.id.text11);
+        text12= (TextView)findViewById(R.id.text12);
+        text13 = (TextView)findViewById(R.id.text13);
+        text14 = (TextView)findViewById(R.id.text14);
+        text15= (TextView)findViewById(R.id.text15);
+        text16 = (TextView)findViewById(R.id.text16);
+        text17 = (TextView)findViewById(R.id.text17);
+        text18 = (TextView)findViewById(R.id.text18);
+        text19= (TextView)findViewById(R.id.text19);
+        text20 = (TextView)findViewById(R.id.text20);
+        textViews = new TextView[]{text0, text1, text2, text3, text4, text5, text6, text7, text8, text9, text10, text11, text12 ,text13, text14, text15, text16, text17, text18, text19, text20};
 
         button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -39,49 +62,37 @@ public class MainActivity extends AppCompatActivity {
                     public void run() {
                         try {
                             final Document doc = Jsoup.connect("https://store.steampowered.com/search/?term=" + name + "&category1=998").get();
-                            String result = doc.select("div[class=search_results_count]").text();
 
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    String result = doc.select("div[class=search_results_count]").text();
+                                    if (result.equals("0 results match your search.")) {
+                                        info.setText("can't find game with this title");
+                                    } else {
+                                        info.setText("");
+                                        Elements el2 = doc.select("#search_resultsRows");
+                                        Elements elements = el2.select("a");
 
-                            if (result.equals("0 results match your search.")){
-                                info.setText("can't find game with this title");
-                            } else {
-                                Elements el = doc.select("#search_results");
-                                Element firstElement = el.select("a").first();
-                                String title = firstElement.select("span.title").text();
-                                String price = firstElement.select("div[class=col search_price  responsive_secondrow]").text();
-                                String discountedPrice = firstElement.select("div[class=col search_price discounted responsive_secondrow]").text();
-                                info.setText(title + " " + price + " " + discountedPrice);
-
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        wrongName.setText("Wrong title ?");
-                                        wrongName.setOnClickListener(new View.OnClickListener() {
-                                            @Override
-                                            public void onClick(View view) {
-                                                info.setText(" ");
-                                                Elements el2 = doc.select("#search_results");
-                                                Elements elements = el2.select("a");
-                                                boolean found = false;
-                                                for (Element element : elements){
-                                                    String title = element.select("span.title").text();
-                                                    if (name.toUpperCase().equals(title.toUpperCase())){
-                                                        String price = element.select("div[class=col search_price  responsive_secondrow]").text();
-                                                        String discountedPrice = element.select("div[class=col search_price discounted responsive_secondrow]").text();
-                                                        info.setText(title + " " + price + " " + discountedPrice);
-                                                        found = true;
-                                                        wrongName.setText("");
+                                        int n = 0;
+                                        for (Element element : elements) {
+                                            if (n <= 20) {
+                                                final String title = element.select("span.title").text();
+                                                String price = element.select("div[class=col search_price  responsive_secondrow]").text();
+                                                String discountedPrice = element.select("div[class=col search_price discounted responsive_secondrow]").text();
+                                                textViews[n].setText(title + " " + price + " " + discountedPrice);
+                                                textViews[n].setOnClickListener(new View.OnClickListener() {
+                                                    @Override
+                                                    public void onClick(View view) {
+                                                        info.setText(title);
                                                     }
-                                                }
-                                                if (found == false){
-                                                    info.setText("can't find game with this title");
-                                                    wrongName.setText("");
-                                                }
+                                                });
+                                                n = n + 1;
                                             }
-                                        });
+                                        }
                                     }
-                                });
-                            }
+                                }
+                            });
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
